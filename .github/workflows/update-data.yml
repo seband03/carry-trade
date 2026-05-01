@@ -1,0 +1,55 @@
+name: Actualizar datos diarios
+
+on:
+  schedule:
+    - cron: '0 12 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetchear UVA y Oficial
+        run: |
+          python3 -c "
+import urllib.request, json, datetime
+data = {}
+try:
+  req = urllib.request.Request('https://api.estadisticasbcra.com/uva', headers={'Authorization': 'BEARER ${{ secrets.BCRA_TOKEN }}'})
+  with urllib.request.urlopen(req, timeout=10) as r:
+    arr = json.loads(r.read())
+    last = arr[-1]
+    data['uva_hoy'] = last['v']
+    data['uva_fecha'] = last['d']
+except Exception as e:
+  print('UVA fallo:', e)
+  data['uva_hoy'] = None
+  data['uva_fecha'] = None
+try:
+  with urllib.request.urlopen('https://dolarapi.com/v1/dolares/oficial', timeout=10) as r:
+    d = json.loads(r.read())
+    data['oficial_compra'] = d['compra']
+    data['oficial_venta'] = d['venta']
+    data['oficial_fecha'] = str(datetime.date.today())
+except Exception as e:
+  data['oficial_compra'] = None
+  data['oficial_venta'] = None
+  data['oficial_fecha'] = None
+data['rem'] = {'mar_26':3.4,'abr_26':3.1,'may_26':2.3,'jun_26':1.9,'jul_26':1.8}
+data['updated_at'] = datetime.datetime.utcnow().isoformat() + 'Z'
+open('data.json','w').write(__import__('json').dumps(data, indent=2))
+print('OK')
+"
+
+      - name: Commit y push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "datos $(date +'%Y-%m-%d')"
+          git push
