@@ -1,0 +1,16 @@
+{
+  "uva_hoy": 1912.00,
+  "uva_fecha": "2026-04-30",
+  "oficial_compra": 1360,
+  "oficial_venta": 1410,
+  "oficial_fecha": "2026-05-01",
+  "rofex_julio": 1480,
+  "rem": {
+    "mar_26": 3.4,
+    "abr_26": 3.1,
+    "may_26": 2.3,
+    "jun_26": 1.9,
+    "jul_26": 1.8
+  },
+  "updated_at": "2026-05-01T00:00:00Z"
+}

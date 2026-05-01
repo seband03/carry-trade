@@ -1,0 +1,76 @@
+name: Actualizar datos diarios
+
+on:
+  schedule:
+    - cron: '0 12 * * 1-5'  # Lunes a viernes 9am Argentina (UTC-3 = 12 UTC)
+  workflow_dispatch:          # También permite correrlo manualmente
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetchear UVA, Oficial y REM
+        run: |
+          python3 << 'PYEOF'
+          import urllib.request, json, datetime
+
+          data = {}
+
+          # ── UVA desde estadisticasbcra con token ──────────────────
+          try:
+            req = urllib.request.Request(
+              'https://api.estadisticasbcra.com/uva',
+              headers={'Authorization': 'BEARER ${{ secrets.BCRA_TOKEN }}'}
+            )
+            with urllib.request.urlopen(req, timeout=10) as r:
+              arr = json.loads(r.read())
+              last = arr[-1]
+              data['uva_hoy'] = last['v']
+              data['uva_fecha'] = last['d']
+              print(f"UVA: {last['v']} ({last['d']})")
+          except Exception as e:
+            print(f"UVA falló: {e}")
+            data['uva_hoy'] = None
+            data['uva_fecha'] = None
+
+          # ── Dólar oficial desde dolarapi ──────────────────────────
+          try:
+            with urllib.request.urlopen('https://dolarapi.com/v1/dolares/oficial', timeout=10) as r:
+              d = json.loads(r.read())
+              data['oficial_compra'] = d['compra']
+              data['oficial_venta']  = d['venta']
+              data['oficial_fecha']  = d.get('fechaActualizacion', str(datetime.date.today()))
+              print(f"Oficial: compra {d['compra']} / venta {d['venta']}")
+          except Exception as e:
+            print(f"Oficial falló: {e}")
+            data['oficial_compra'] = None
+            data['oficial_venta']  = None
+
+          # ── REM — valores fijos hasta que se actualice manualmente ─
+          # Actualizar acá cuando salga cada nuevo REM del BCRA
+          data['rem'] = {
+            "mar_26": 3.4,
+            "abr_26": 3.1,
+            "may_26": 2.3,
+            "jun_26": 1.9,
+            "jul_26": 1.8
+          }
+
+          data['updated_at'] = datetime.datetime.utcnow().isoformat() + 'Z'
+
+          with open('data.json', 'w') as f:
+            json.dump(data, f, indent=2)
+
+          print("data.json actualizado OK")
+          PYEOF
+
+      - name: Commit y push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "datos $(date +'%Y-%m-%d')"
+          git push
