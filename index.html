@@ -385,7 +385,7 @@ function calcular(uvaHoy, tcOficial) {
   document.getElementById('hValARS').textContent = ars(valorHoy);
   document.getElementById('hSub').textContent    = `${UVAS_TOTAL.toFixed(2)} UVAs × ${ars2(uvaHoy)}`;
   document.getElementById('hGanARS').textContent = (ganARS>=0?'+':'')+ars(ganARS);
-  const ganUSDhoy = tcOficial>0 ? ganARS/tcOficial : null;
+  const ganUSDhoy = tcOficial>0 ? (UVAS_TOTAL*uvaHoy)/tcOficial - USD_VENDIDOS : null;
   const elGU = document.getElementById('hGanUSD');
   if(elGU){ elGU.textContent = ganUSDhoy!==null?(ganUSDhoy>=0?'+':'')+ganUSDhoy.toFixed(2)+' USD':'—'; elGU.style.color=ganARS>=0?'var(--blue)':'var(--red)'; }
   document.getElementById('hGanPct').textContent = pct(ganPct);
