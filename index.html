@@ -147,6 +147,10 @@ body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--t
       <div class="l">Rendimiento %</div>
     </div>
     <div class="hs">
+      <div class="v" id="hGanUSD" style="color:var(--blue)">—</div>
+      <div class="l">Gan. USD hoy</div>
+    </div>
+    <div class="hs">
       <div class="v" id="hDias" style="color:var(--label)">—</div>
       <div class="l">Días restantes</div>
     </div>
@@ -265,6 +269,21 @@ body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--t
   </div>
 </div>
 
+    <div style="background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px">
+      <div>
+        <div style="font-size:10px;color:var(--label);margin-bottom:3px;font-family:'DM Mono',monospace">TC oficial estimado al 28/jul</div>
+        <div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--blue)" id="cTCest">—</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px" id="cTCestSub">TC hoy × (1+crawling)³</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:var(--label);margin-bottom:3px;font-family:'DM Mono',monospace">Crawling mensual est.</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" id="iCrawlPct" value="1" step="0.1" min="0" max="5" style="background:var(--card);border:1.5px solid var(--b);border-radius:5px;padding:4px 8px;color:var(--blue);font-family:'DM Mono',monospace;font-size:13px;width:70px">
+          <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">% / mes</span>
+        </div>
+      </div>
+    </div>
+
 <div class="nota">
   ⚠ UVA y dólar oficial: actualizados diariamente por GitHub Actions (lunes a viernes 9am).<br>
   REM: editables manualmente — actualizar cuando el BCRA publique cada dato.<br>
@@ -366,6 +385,9 @@ function calcular(uvaHoy, tcOficial) {
   document.getElementById('hValARS').textContent = ars(valorHoy);
   document.getElementById('hSub').textContent    = `${UVAS_TOTAL.toFixed(2)} UVAs × ${ars2(uvaHoy)}`;
   document.getElementById('hGanARS').textContent = (ganARS>=0?'+':'')+ars(ganARS);
+  const ganUSDhoy = tcOficial>0 ? ganARS/tcOficial : null;
+  const elGU = document.getElementById('hGanUSD');
+  if(elGU){ elGU.textContent = ganUSDhoy!==null?(ganUSDhoy>=0?'+':'')+ganUSDhoy.toFixed(2)+' USD':'—'; elGU.style.color=ganARS>=0?'var(--blue)':'var(--red)'; }
   document.getElementById('hGanPct').textContent = pct(ganPct);
   document.getElementById('hDias').textContent   = diasRest+'d';
 
@@ -466,9 +488,14 @@ function calcular(uvaHoy, tcOficial) {
   document.getElementById('cBEd').style.color = diffBE>=0?'var(--red)':'var(--green)';
   document.getElementById('cAnl').textContent = pct(anual);
   document.getElementById('cAnl').style.color = anual>=0?'var(--green)':'var(--red)';
+  const crawlM = parseFloat(document.getElementById('iCrawlPct')?.value||'1')/100;
+  const tcCierre = tcOficial*Math.pow(1+crawlM,3);
+  const elTC=document.getElementById('cTCest'); if(elTC) elTC.textContent=ars2(tcCierre);
+  const elTCs=document.getElementById('cTCestSub'); if(elTCs) elTCs.textContent=ars2(tcOficial)+' × (1+'+( crawlM*100).toFixed(1)+'%)³';
 }
 
 // Recalcular cuando se edita el REM
+document.getElementById('iCrawlPct')?.addEventListener('input',()=>{ if(DATA.uva_hoy&&DATA.oficial_venta) calcular(DATA.uva_hoy,DATA.oficial_venta); });
 document.querySelectorAll('.ri input').forEach(i=>i.addEventListener('input',()=>{
   const uva = DATA.uva_hoy;
   const of  = DATA.oficial_venta;
