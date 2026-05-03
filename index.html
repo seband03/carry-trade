@@ -321,6 +321,12 @@ function set(id,v,cls){
 // ── Cargar data.json (generado por GitHub Actions) ─────────
 let DATA = {};
 async function loadData() {
+  const _b=USD_VENDIDOS*TC_VENTA,_c=_b*COMISION;
+  const eIB=document.getElementById("iiBrutoARS");if(eIB)eIB.textContent=ars(_b);
+  const eIC=document.getElementById("iiComision");if(eIC)eIC.textContent="-"+ars(_c);
+  const eIN=document.getElementById("iiNeto");if(eIN)eIN.textContent=ars(_b-_c);
+  const eIS=document.getElementById("iiBrutoSub");if(eIS)eIS.textContent=USD_VENDIDOS+" USD × "+ars2(TC_VENTA);
+
   try {
     // cache-bust para que no quede versión vieja
     const r = await fetch('./data.json?t='+Date.now(),
