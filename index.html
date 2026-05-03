@@ -130,6 +130,8 @@ body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--t
 </div>
 
 <!-- HERO: valor actual de la inversión -->
+<div class="sec">Inversión inicial</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px"><div class="tc"><div class="l">Inversión bruta ARS</div><div class="v" id="iiBrutoARS" style="font-size:16px">—</div><div class="s" id="iiBrutoSub">—</div></div><div class="tc"><div class="l">Comisión pagada</div><div class="v" id="iiComision" style="font-size:16px;color:var(--red)">—</div><div class="s">1% operación MEP</div></div><div class="tc"><div class="l">Capital neto invertido</div><div class="v" id="iiNeto" style="font-size:16px">—</div><div class="s">referencia en USD</div></div></div>
 <div class="sec">Valor actual de la inversión</div>
 <div class="hero">
   <div class="hero-main">
@@ -146,10 +148,7 @@ body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--t
       <div class="v" id="hGanPct" style="color:var(--or)"><span class="shim"></span></div>
       <div class="l">Rendimiento %</div>
     </div>
-    <div class="hs">
-      <div class="v" id="hGanUSD" style="color:var(--blue)">—</div>
-      <div class="l">Gan. USD hoy</div>
-    </div>
+    <div class="hs"><div class="v" id="hGanUVAusd" style="color:var(--or)">—</div><div class="l">Gan. UVA USD</div></div><div class="hs" style="border-left:1px solid var(--b);padding-left:14px"><div class="v" id="hGanTCusd">—</div><div class="l">Gan. TC USD</div></div><div class="hs"><div class="v" id="hVarTC">—</div><div class="l">Var. TC %</div></div><div class="hs" style="border-left:1px solid var(--b);padding-left:14px"><div class="v" id="hGanUSD">—</div><div class="l">Gan. total USD</div></div>
     <div class="hs">
       <div class="v" id="hDias" style="color:var(--label)">—</div>
       <div class="l">Días restantes</div>
@@ -385,7 +384,7 @@ function calcular(uvaHoy, tcOficial) {
   document.getElementById('hValARS').textContent = ars(valorHoy);
   document.getElementById('hSub').textContent    = `${UVAS_TOTAL.toFixed(2)} UVAs × ${ars2(uvaHoy)}`;
   document.getElementById('hGanARS').textContent = (ganARS>=0?'+':'')+ars(ganARS);
-  const ganUSDhoy = tcOficial>0 ? (UVAS_TOTAL*uvaHoy)/tcOficial - USD_VENDIDOS : null;
+  const ganTotalUSD=tcOficial>0?(UVAS_TOTAL*uvaHoy)/tcOficial-USD_VENDIDOS:null;const ganUVAars=(uvaHoy-UVA_INICIO)*UVAS_TOTAL;const ganUVAusd=tcOficial>0?ganUVAars/tcOficial:null;const ganTCusd=(ganTotalUSD!==null&&ganUVAusd!==null)?ganTotalUSD-ganUVAusd:null;const varTCpct=((TC_VENTA-tcOficial)/TC_VENTA)*100;function tcColor(p){return p>3?"#22C87A":p>1.5?"#6EE7A0":p>0.3?"#A8F0C6":p>-0.3?"#F5E08F":p>-1.5?"#F8A89A":p>-3?"#F04040":"#B91C1C";}const tcCol=tcColor(varTCpct);const elGUVA=document.getElementById("hGanUVAusd");if(elGUVA)elGUVA.textContent=ganUVAusd!==null?(ganUVAusd>=0?"+":"")+ganUVAusd.toFixed(2)+" USD":"—";const elGTC=document.getElementById("hGanTCusd");if(elGTC){elGTC.textContent=ganTCusd!==null?(ganTCusd>=0?"+":"")+ganTCusd.toFixed(2)+" USD":"—";elGTC.style.color=tcCol;}const elVTC=document.getElementById("hVarTC");if(elVTC){elVTC.textContent=(varTCpct>=0?"+":"")+varTCpct.toFixed(2)+"%";elVTC.style.color=tcCol;}const ganUSDhoy=ganTotalUSD;
   const elGU = document.getElementById('hGanUSD');
   if(elGU){ elGU.textContent = ganUSDhoy!==null?(ganUSDhoy>=0?'+':'')+ganUSDhoy.toFixed(2)+' USD':'—'; elGU.style.color=ganARS>=0?'var(--blue)':'var(--red)'; }
   document.getElementById('hGanPct').textContent = pct(ganPct);
