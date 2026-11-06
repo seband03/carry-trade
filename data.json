@@ -1,9 +1,9 @@
 {
   "uva_hoy": 2185.48,
-  "uva_fecha": "2026-11-06",
+  "uva_fecha": "2026-11-07",
   "oficial_compra": 1520,
   "oficial_venta": 1570,
-  "oficial_fecha": "2026-11-05",
+  "oficial_fecha": "2026-11-06",
   "rem": {
     "mar_26": 3.4,
     "abr_26": 3.1,
@@ -11,5 +11,5 @@
     "jun_26": 1.9,
     "jul_26": 1.8
   },
-  "updated_at": "2026-11-05T19:46:36.301348Z"
+  "updated_at": "2026-11-06T19:10:08.457564Z"
 }
